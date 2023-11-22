@@ -1,3 +1,5 @@
+// server.js
+
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -13,31 +15,42 @@ app.use(cors());
 
 let users = [];
 let activeUsers = [];
+let currentTurn = 1; 
 const maxUsersInRoom = 2;
 
 socketIO.on('connection', (socket) => {
-
     if (activeUsers.length >= maxUsersInRoom) {
         console.log(`❌: ${socket.id} user denied access, room is full`);
         socket.disconnect();
         return;
-    }
-
-    else
-    {
+    } else {
         console.log(`⚡: ${socket.id} user just connected!`);
-        socket.on("message", data => {
-            if (activeUsers.find(user => user.socketID === socket.id)) {
-                socketIO.emit("messageResponse", data);
+
+        socket.on("newUser", data => {
+            const newPlayerID = activeUsers.length + 1;
+            const newUser = { ...data, socketID: socket.id, playerID: newPlayerID };
+            users.push(newUser);
+            activeUsers.push(newUser);
+            socketIO.emit("newUserResponse", users);
+
+            // Si c'est le premier utilisateur, définissez son tour comme le tour actuel
+            if (newPlayerID === 1) {
+                currentTurn = newPlayerID;
+                socketIO.emit("updateTurn", currentTurn);
             }
         });
-    
-        socket.on("newUser", data => {
-            users.push(data);
-            activeUsers.push(data);
-            socketIO.emit("newUserResponse", users);
+
+        socket.on("message", data => {
+            const currentUser = activeUsers.find(user => user.socketID === socket.id);
+            if (currentUser && currentUser.playerID === currentTurn) {
+                socketIO.emit("messageResponse", { ...data, playerID: currentUser.playerID });
+                
+                // Passez au tour suivant
+                currentTurn = (currentTurn % maxUsersInRoom) + 1;
+                socketIO.emit("updateTurn", currentTurn);
+            }
         });
-    
+
         socket.on('disconnect', () => {
             console.log('🔥: A user disconnected');
             users = users.filter(user => user.socketID !== socket.id);
@@ -45,8 +58,6 @@ socketIO.on('connection', (socket) => {
             socketIO.emit("newUserResponse", users);
         });
     }
-
-    
 });
 
 app.get("/api", (req, res) => {
