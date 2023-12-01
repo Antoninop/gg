@@ -55,6 +55,18 @@ socketIO.on('connection', (socket) => {
                 currentTurn = (currentTurn % maxUsersInRoom) + 1;
                 socketIO.emit("updateTurn", currentTurn);
             }
+
+            if (!currentUser.isPlayer1) {
+                console.log('Received Message:', data.text.trim().toLowerCase());
+                console.log('Expected Message:', 'testVictoire');
+                
+                if (data.text.trim().toLowerCase() === 'testvictoire') {
+                    console.log('🔥: Victoire !');
+                    socketIO.emit('alertMessage', { message: 'Victoire !' });
+                }
+            }
+            
+
         });
 
         socket.on('disconnect', () => {

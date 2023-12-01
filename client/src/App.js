@@ -13,6 +13,13 @@ socket.on("playerRole", data => {
 });
 
 
+// Client side
+socket.on("alertMessage", data => {
+  // Handle the alert message, for example, display an alert
+  alert(data.message);
+});
+
+
 
 function App() {
   return (

@@ -6,11 +6,11 @@ const ChatBody = ({ messages, typingStatus, lastMessageRef }) => {
   const [randomWord, setRandomWord] = useState('');
   const isPlayer1 = localStorage.getItem('isPlayer1') === '1';
 
-  const wordsList = ['Mot1', 'Mot2', 'Mot3', 'Mot4', 'Mot5']; // Add your French words here
+  const wordsList = ['Mot1', 'Mot2', 'Mot3', 'Mot4', 'Mot5']; 
 
+  
   useEffect(() => {
     if (isPlayer1) {
-      // Display random word only for player 1
       const randomIndex = Math.floor(Math.random() * wordsList.length);
       setRandomWord(wordsList[randomIndex]);
     }
