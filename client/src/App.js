@@ -4,6 +4,16 @@ import ChatPage from "./components/ChatPage";
 import socketIO from "socket.io-client"
 
 const socket = socketIO.connect("http://localhost:4000")
+
+let isPlayer1;
+
+socket.on("playerRole", data => {
+    isPlayer1 = data.isPlayer1;
+    localStorage.setItem("isPlayer1", isPlayer1 ? "1" : "0");
+});
+
+
+
 function App() {
   return (
     <BrowserRouter>

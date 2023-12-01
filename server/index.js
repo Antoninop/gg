@@ -26,19 +26,25 @@ socketIO.on('connection', (socket) => {
     } else {
         console.log(`⚡: ${socket.id} user just connected!`);
 
+
         socket.on("newUser", data => {
             const newPlayerID = activeUsers.length + 1;
-            const newUser = { ...data, socketID: socket.id, playerID: newPlayerID };
+            const isPlayer1 = newPlayerID === 1;
+
+            const newUser = { ...data, socketID: socket.id, playerID: newPlayerID, isPlayer1 };
             users.push(newUser);
             activeUsers.push(newUser);
             socketIO.emit("newUserResponse", users);
 
-            // Si c'est le premier utilisateur, définissez son tour comme le tour actuel
-            if (newPlayerID === 1) {
+            // Ajoutez cette ligne pour informer le client de son rôle de joueur
+            socket.emit("playerRole", { isPlayer1 });
+
+            if (isPlayer1) {
                 currentTurn = newPlayerID;
                 socketIO.emit("updateTurn", currentTurn);
             }
         });
+
 
         socket.on("message", data => {
             const currentUser = activeUsers.find(user => user.socketID === socket.id);
