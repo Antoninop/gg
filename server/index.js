@@ -50,21 +50,24 @@ socketIO.on('connection', (socket) => {
             const currentUser = activeUsers.find(user => user.socketID === socket.id);
             if (currentUser && currentUser.playerID === currentTurn) {
                 socketIO.emit("messageResponse", { ...data, playerID: currentUser.playerID });
+
+
+                if (!currentUser.isPlayer1) {
+                    console.log('Received Message:', data.text.trim().toLowerCase());
+                    console.log('Expected Message:', 'testVictoire');
+                    
+                    if (data.text.trim().toLowerCase() === 'testvictoire') {
+                        console.log('🔥: Victoire !');
+                        socketIO.emit('alertMessage', { message: 'Victoire !' });
+                    }
+                }
                 
                 // Passez au tour suivant
                 currentTurn = (currentTurn % maxUsersInRoom) + 1;
                 socketIO.emit("updateTurn", currentTurn);
             }
 
-            if (!currentUser.isPlayer1) {
-                console.log('Received Message:', data.text.trim().toLowerCase());
-                console.log('Expected Message:', 'testVictoire');
-                
-                if (data.text.trim().toLowerCase() === 'testvictoire') {
-                    console.log('🔥: Victoire !');
-                    socketIO.emit('alertMessage', { message: 'Victoire !' });
-                }
-            }
+            
             
 
         });
